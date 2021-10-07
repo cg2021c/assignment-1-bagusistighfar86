@@ -4,6 +4,8 @@ Name : Muhammad Bagus Istighfar
 NRP : 05111940000049
 Object : Camera
 
+# Assignment 1
+
 Top-Front :
 [![8478.jpg](https://i.postimg.cc/vH1JqZTQ/8478.jpg)](https://postimg.cc/RNBpq9w8)
 
@@ -19,7 +21,7 @@ Top-Front :
 Top-Front : 
 [![8479.jpg](https://i.postimg.cc/vH6K722T/8479.jpg)](https://postimg.cc/F7NGNp4X)
 
-#Assignment 2
+# Assignment 2
 1. The application consists of HTML, JavaScript and CSS (optional) files.
 2. The application contains only one Canvas.
 3. The JavaScript application comprises the definition of vertices that embody the shape of the object photographed in the previous assignment: Select two of the four photos.
