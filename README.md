@@ -32,7 +32,7 @@ Top-Front :
 8. where xxx is the last three digits of the NRP.
 
 The side that i choosed were top-front and top-right.
-Link to preview the Object : 
+Link to preview the Object : [Link Preview](https://bagusistighfar86.github.io/cg2021e/assignment2/)
 
 Move Speed : 0.0049
 
