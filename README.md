@@ -1,8 +1,8 @@
 [![Open in Visual Studio Code](https://classroom.github.com/assets/open-in-vscode-f059dc9a6f8d3a56e377f745f24479a46679e63a5d9fe6f495e02850cd0d8118.svg)](https://classroom.github.com/online_ide?assignment_repo_id=5762965&assignment_repo_type=AssignmentRepo)
 
-Name : Muhammad Bagus Istighfar
-NRP : 05111940000049
-Object : Camera
+Name : Muhammad Bagus Istighfar<br/>
+NRP : 05111940000049<br/>
+Object : Camera<br/>
 
 # Assignment 1
 
@@ -31,8 +31,8 @@ Top-Front :
 7. The rendering result on the right side of the Canvas is animated vertically, bouncing back between the top and the bottom walls of the Canvas, with a speed of 0.0xxx units,
 8. where xxx is the last three digits of the NRP.
 
-The side that i choosed were top-front and top-right.
-Link to preview the Object : [Link Preview](https://bagusistighfar86.github.io/cg2021c/assignment2/)
+The side that i choosed were top-front and top-right.<br/>
+Link to preview the Object : [Link Preview](https://bagusistighfar86.github.io/cg2021c/assignment2/)<br/>
 
-Move Speed : 0.0049
+Move Speed : 0.0049<br/>
 
