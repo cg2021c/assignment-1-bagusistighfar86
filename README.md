@@ -10,15 +10,15 @@ Top-Front :
 [![8478.jpg](https://i.postimg.cc/vH1JqZTQ/8478.jpg)](https://postimg.cc/RNBpq9w8)
 
 
-Top-Front :
+Top-Back :
 [![8481.jpg](https://i.postimg.cc/jdKfvLZf/8481.jpg)](https://postimg.cc/V5G5kLys)
 
 
-Top-Front :
+Top-Left :
 [![8480.jpg](https://i.postimg.cc/fLTFxw1Q/8480.jpg)](https://postimg.cc/yJtvKzVL)
 
 
-Top-Front : 
+Top-Right : 
 [![8479.jpg](https://i.postimg.cc/vH6K722T/8479.jpg)](https://postimg.cc/F7NGNp4X)
 
 # Assignment 2
