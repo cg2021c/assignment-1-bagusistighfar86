@@ -46,7 +46,10 @@ Move Speed : 0.0049<br/>
 7. Add a plastic specular effect for the left object. 
 8. Add a metal specular effect for the object on the right. 
 9. Set the cube so that it can be moved upward with the W key-button and downward with the S key-button. 
-10. Set the camera to move leftward and rightward linearly (not orbitally) using the A and D key-buttons.
+10. Set the camera to move leftward and rightward linearly (not orbitally) using the A and D key-buttons.<br/>
+Link to preview the Object : [Link Preview](https://bagusistighfar86.github.io/cg2021c/assignment3/)<br/>
+
+
 
 ### Problem
 I'm sorry. I have tried many times, but this commit, without Lens. I don't know how to make cylinder and group with other object. 
