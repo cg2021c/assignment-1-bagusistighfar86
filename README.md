@@ -36,3 +36,17 @@ Link to preview the Object : [Link Preview](https://bagusistighfar86.github.io/c
 
 Move Speed : 0.0049<br/>
 
+# Assignment 3
+1. Create a 3D definition of the object being photographed in your very first assignment.
+2. Draw the object twice—on the left and on the right half of the canvas—with the two perspectives corresponding to the two photos selected in the previous assignment.
+3. Add a little cube in the center of canvas, right between the two objects.
+4. Set the cube to glow white and become a light source.
+5. Add an ambient effect with an intensity of 0.abc to both objects, where the value of abc is the last three digits of your Student ID plus 200.
+6. Add a diffuse effect to both objects. 
+7. Add a plastic specular effect for the left object. 
+8. Add a metal specular effect for the object on the right. 
+9. Set the cube so that it can be moved upward with the W key-button and downward with the S key-button. 
+10. Set the camera to move leftward and rightward linearly (not orbitally) using the A and D key-buttons.
+
+### Problem
+I'm sorry. I have tried many times, but this commit, without Lens. I don't know how to make cylinder and group with other object. 
