@@ -121,6 +121,54 @@ function main() {
 		}
 	`;
 
+	var fragmentShaderSourcePlane = `
+	precision mediump float;
+	varying vec3 vPosition;
+	varying vec3 vColor;
+	varying vec3 vNormal;
+	uniform vec3 uAmbientConstant;   // Represents the light color
+	uniform float uAmbientIntensity;
+	uniform vec3 uDiffuseConstant;  // Represents the light color
+	uniform vec3 uLightPosition;
+	uniform mat3 uNormalModel;
+	uniform vec3 uSpecularConstant; // Represents the light color
+	uniform vec3 uViewerPosition;
+	void main() {
+		
+		// Calculate the ambient component
+		vec3 ambient = uAmbientConstant * uAmbientIntensity;
+		
+		// Prepare the diffuse components
+		vec3 normalizedNormal = normalize(uNormalModel * vNormal);
+		vec3 vLight = uLightPosition - vPosition;
+		vec3 normalizedLight = normalize(vLight);
+		vec3 diffuse = vec3(0., 0., 0.);
+		float cosTheta = max(dot(normalizedNormal, normalizedLight), 0.);
+		// Prepare the specular components
+		vec3 vReflector = 2.0 * cosTheta * vNormal - (vLight);
+		// or using the following expression
+		// vec3 vReflector = reflect(-vLight, vNormal);
+		vec3 vViewer = uViewerPosition - vPosition;
+		vec3 normalizedViewer = normalize(vViewer);
+		vec3 normalizedReflector = normalize(vReflector);
+		float shininessConstant = 100.0;
+		vec3 specular = vec3(0., 0., 0.);
+		float cosPhi = max(dot(normalizedViewer, normalizedReflector), 0.);
+		
+		// Calculate the phong reflection effect
+		if (cosTheta > 0.) {
+			diffuse = uDiffuseConstant * cosTheta;
+		}
+		if (cosPhi > 0.) {
+			specular = uSpecularConstant * pow(cosPhi, shininessConstant);
+		}
+		vec3 phong = ambient + diffuse + specular;
+		// Apply the shading
+		gl_FragColor = vec4(phong * vColor, 1.);
+		// gl_FragColor.w = 0.5; //transparency
+	}
+	`;
+
 	// copying the first obj
 	var vertices_left = new Float32Array(vertices);
 
@@ -219,26 +267,33 @@ function main() {
 	gl.shaderSource(fragmentShaderL, fragmentShaderSourceL);
 	var fragmentShaderR = gl.createShader(gl.FRAGMENT_SHADER);
 	gl.shaderSource(fragmentShaderR, fragmentShaderSourceR);
+	var fragmentShaderPlane = gl.createShader(gl.FRAGMENT_SHADER);
+	gl.shaderSource(fragmentShaderPlane, fragmentShaderSourcePlane);
 
 
 	// Compile .c into .o
 	gl.compileShader(vertexShader);
 	gl.compileShader(fragmentShaderL);
 	gl.compileShader(fragmentShaderR);
+	gl.compileShader(fragmentShaderPlane);
 
 	// Prepare a .exe shell (shader program)
 	var shaderProgramL = gl.createProgram();
 	var shaderProgramR = gl.createProgram();
+	var shaderProgramPlane = gl.createProgram();
 
 	// Put the two .o files into the shell
 	gl.attachShader(shaderProgramL, vertexShader);
 	gl.attachShader(shaderProgramL, fragmentShaderL);
 	gl.attachShader(shaderProgramR, vertexShader);
 	gl.attachShader(shaderProgramR, fragmentShaderR);
+	gl.attachShader(shaderProgramPlane, vertexShader);
+	gl.attachShader(shaderProgramPlane, fragmentShaderPlane);
 
 	// Link the two .o files, so together they can be a runnable program/context.
 	gl.linkProgram(shaderProgramL);
 	gl.linkProgram(shaderProgramR);
+	gl.linkProgram(shaderProgramPlane);
 	// end shader init section
 
 
@@ -275,6 +330,17 @@ function main() {
 			[0.0, 1.0, 0.0]
 	);
 	gl.uniformMatrix4fv(uViewR, false, viewMatrixR);
+
+	gl.useProgram(shaderProgramPlane);
+	var uViewPlane = gl.getUniformLocation(shaderProgramPlane, "uView");
+	var viewMatrixPlane = glMatrix.mat4.create();
+	glMatrix.mat4.lookAt(
+			viewMatrixPlane,
+			[cameraX, cameraY, cameraZ],    // the location of the eye or the camera
+			[cameraX, 0.0, -10],        // the point where the camera look at
+			[0.0, 1.0, 0.0]
+	);
+	gl.uniformMatrix4fv(uViewPlane, false, viewMatrixPlane);
 	// end cam init section 
 	
 	var changeX = 0;
@@ -287,6 +353,7 @@ function main() {
 		cur_program = option ;
 		if (option == 'l') gl.uniformMatrix4fv(uView, false, viewMatrix);
 		if (option == 'r') gl.uniformMatrix4fv(uViewR, false, viewMatrixR);
+		if (option == 'plane') gl.uniformMatrix4fv(uViewPlane, false, viewMatrixPlane);
 				
 		// Create a linked-list for storing the vertices data
 		var vertexBuffer = gl.createBuffer();
@@ -345,8 +412,6 @@ function main() {
 		
 		var uNormalModel = gl.getUniformLocation(currShader, "uNormalModel");
 		gl.uniform3fv(uDiffuseConstant, [1.0, 1.0, 1.0]);   // white light
-		if (option == 'r')	gl.uniform3fv(uLightPositionR, box_center);    // light position
-		if (option == 'l')	gl.uniform3fv(uLightPosition, box_center);
 
 		// Perspective projection
 		var uProjection = gl.getUniformLocation(currShader, "uProjection");
@@ -398,6 +463,7 @@ function main() {
 		gl.clearColor(0., 0., 0., 1.); // black canvas
 		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 		// renderLeft();
+		renderCurrent(shaderProgramPlane, plane, indices_place, 'plane');
 		renderCurrent(shaderProgramL, vertices_left, indices_left, 'l');
 		renderCurrent(shaderProgramR, vertices, indices, 'r');
 		requestAnimationFrame(render);
