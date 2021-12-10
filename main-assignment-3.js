@@ -245,7 +245,7 @@ function main() {
 		box[it + 2] += box_center[2];
 	}
 
-	var cube_box = 24 * 4;
+	var cube_box = 24 * 5;
 	var box_index = [
 		// cube light
 		0 + cube_box, 1 + cube_box, 2 + cube_box,     0 + cube_box, 2 + cube_box, 3 + cube_box,     // Face A
@@ -309,6 +309,7 @@ function main() {
 
 	var uLightPosition = gl.getUniformLocation(shaderProgramL, "uLightPosition");
 	var uLightPositionR = gl.getUniformLocation(shaderProgramR, "uLightPosition");
+	var uLightPositionPlane = gl.getUniformLocation(shaderProgramPlane, "uLightPosition");
 
 	gl.useProgram(shaderProgramL);
 	var uView = gl.getUniformLocation(shaderProgramL, "uView");
@@ -323,7 +324,6 @@ function main() {
 
 	gl.useProgram(shaderProgramR);
 	var uViewR = gl.getUniformLocation(shaderProgramR, "uView");
-	gl.uniformMatrix4fv(uViewR, false, viewMatrix);
 	var viewMatrixR = glMatrix.mat4.create();
 	glMatrix.mat4.lookAt(
 			viewMatrixR,
@@ -346,19 +346,88 @@ function main() {
 	// end cam init section
 	
 	// controller section
-  	
-	function onKeydown(event) {
-		if (event.keyCode == 32) // space
-			if (challenge4switch) challenge4switch = false; 
-			else challenge4switch = true;
+  	function changeBoxPos(xyz, mov) {
+		var index_start = 9 * 24 * 5;
+		for (var it = 0; it < box.length; it += 9) {
+			vertices[index_start + it + xyz] += mov;
+		}
 	}
+	function lightController(event) {
+		//w
+		if (event.keyCode == 87) {
+			box_center[2]-=0.1;
+			changeBoxPos(2, -0.1);
+		} 
+		//a
+		if (event.keyCode == 65) {
+			box_center[0]-=0.1;
+			changeBoxPos(0, -0.1);
+		}
+		//s
+		if (event.keyCode == 83){
+			box_center[2]+=0.1;
+			changeBoxPos(2, 0.1);
+		}
+		//d
+		if (event.keyCode == 68) {
+			box_center[0]+=0.1;
+			changeBoxPos(0, 0.1);
+		} 
+		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+	}
+	function rotate(cx, cy, x, y, angle) {
+		var radians = (Math.PI / 180) * angle,
+			cos = Math.cos(radians),
+			sin = Math.sin(radians),
+			nx = (cos * (x - cx)) + (sin * (y - cy)) + cx,
+			ny = (cos * (y - cy)) - (sin * (x - cx)) + cy;
+		return [nx, ny];
+	}
+	function onKeydown(event) {
+		var cameraXZ;
+		if (event.keyCode == 37) {
+			cameraXZ = rotate(0.0, 0.0, cameraX, cameraZ, -5); // Left
+			cameraX = cameraXZ[0];
+			cameraZ = cameraXZ[1];
+		} 
+		if (event.keyCode == 38) cameraZ -= 0.1; // Up
+		if (event.keyCode == 39){
+			cameraXZ = rotate(0.0, 0.0, cameraX, cameraZ, 5); // Right
+			cameraX = cameraXZ[0];
+			cameraZ = cameraXZ[1];
+		} 
+		if (event.keyCode == 40) cameraZ += 0.1; // Down
+		if (event.keyCode == 33) cameraY += 0.1; // pgup
+		if (event.keyCode == 34) cameraY -= 0.1; // pgdown
+		if (event.keyCode == 32) 
+			if (challenge4switch) challenge4switch = false; // space
+			else challenge4switch = true;
+		
+			lightController(event);
 
+		glMatrix.mat4.lookAt(
+				viewMatrix,
+				[cameraX, cameraY, cameraZ],    // the location of the eye or the camera
+				[0.0, 0.0, 0],        // the point where the camera look at
+				[0.0, 1.0, 0.0]
+		);
+		glMatrix.mat4.lookAt(
+			viewMatrixR,
+			[cameraX, cameraY, cameraZ],    // the location of the eye or the camera
+			[0.0, 0.0, 0],        // the point where the camera look at
+			[0.0, 1.0, 0.0]
+		);
+		glMatrix.mat4.lookAt(
+			viewMatrixPlane,
+			[cameraX, cameraY, cameraZ],    // the location of the eye or the camera
+			[0.0, 0.0, 0],        // the point where the camera look at
+			[0.0, 1.0, 0.0]
+		);
+		// gl.uniformMatrix4fv(uView, false, viewMatrix);
+		// gl.uniformMatrix4fv(uViewR, false, viewMatrixR);
+	}
 	document.addEventListener("keydown", onKeydown);
 	// end controller section
-	
-	var changeX = 0;
-	var changeY = 0;
-
 
 	function renderCurrent(currShader, currVertices, currIndices, option){
 		// Start using the context (analogy: start using the paints and the brushes)
@@ -425,7 +494,10 @@ function main() {
 		
 		var uNormalModel = gl.getUniformLocation(currShader, "uNormalModel");
 		gl.uniform3fv(uDiffuseConstant, [1.0, 1.0, 1.0]);   // white light
-
+		if (option == 'r')	gl.uniform3fv(uLightPositionR, box_center);    // light position
+		if (option == 'l')	gl.uniform3fv(uLightPosition, box_center);    // light position
+		if (option == 'plane')	gl.uniform3fv(uLightPositionPlane, box_center);
+				
 		// Perspective projection
 		var uProjection = gl.getUniformLocation(currShader, "uProjection");
 		var perspectiveMatrix = glMatrix.mat4.create();
@@ -472,7 +544,6 @@ function main() {
 		var primitive = gl.TRIANGLES;
 		var offset = 0;
 		var nVertex = currIndices.length;
-		// gl.drawArrays(primitive, offset, nVertex);
 		gl.drawElements(primitive, nVertex, gl.UNSIGNED_SHORT, offset);
 		cur_program = '';
 	}
