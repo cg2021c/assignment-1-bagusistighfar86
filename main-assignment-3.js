@@ -169,6 +169,8 @@ function main() {
 	}
 	`;
 
+	var challenge4switch = false;
+
 	// copying the first obj
 	var vertices_left = new Float32Array(vertices);
 
@@ -341,7 +343,18 @@ function main() {
 			[0.0, 1.0, 0.0]
 	);
 	gl.uniformMatrix4fv(uViewPlane, false, viewMatrixPlane);
-	// end cam init section 
+	// end cam init section
+	
+	// controller section
+  	
+	function onKeydown(event) {
+		if (event.keyCode == 32) // space
+			if (challenge4switch) challenge4switch = false; 
+			else challenge4switch = true;
+	}
+
+	document.addEventListener("keydown", onKeydown);
+	// end controller section
 	
 	var changeX = 0;
 	var changeY = 0;
@@ -431,6 +444,11 @@ function main() {
 		var normalModelMatrix = glMatrix.mat3.create();
 		glMatrix.mat3.normalFromMat4(normalModelMatrix, modelMatrix);
 		gl.uniformMatrix3fv(uNormalModel, false, normalModelMatrix);
+		
+		if (challenge4switch) {
+			gl.uniform3fv(uDiffuseConstant, [.0, .0, .0]);   // white light / off
+			gl.uniform3fv(uSpecularConstant, [.0, .0, .0]);  // white light / off
+		}
 
 		gl.enable(gl.DEPTH_TEST);
 		//transparency func
