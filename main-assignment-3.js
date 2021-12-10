@@ -352,27 +352,27 @@ function main() {
 	var lastPointOnTrackBall = currentPointOnTrackBall = getProjectionPointOnSurface(glMatrix.vec3.fromValues(cameraX, cameraY, 0));
 	var lastQuat = glMatrix.quat.create();
 	function computeCurrentQuat() {
-			// count the quartenion rotation in every change of mouse pointer position 
-			var axisFromCrossProduct = glMatrix.vec3.cross(glMatrix.vec3.create(), lastPointOnTrackBall, currentPointOnTrackBall);
-			var angleFromDotProduct = Math.acos(glMatrix.vec3.dot(lastPointOnTrackBall, currentPointOnTrackBall));
-			var rotationQuat = glMatrix.quat.setAxisAngle(glMatrix.quat.create(), axisFromCrossProduct, angleFromDotProduct);
-			glMatrix.quat.normalize(rotationQuat, rotationQuat);
-			return glMatrix.quat.multiply(glMatrix.quat.create(), rotationQuat, lastQuat);
+		// count the quartenion rotation in every change of mouse pointer position 
+		var axisFromCrossProduct = glMatrix.vec3.cross(glMatrix.vec3.create(), lastPointOnTrackBall, currentPointOnTrackBall);
+		var angleFromDotProduct = Math.acos(glMatrix.vec3.dot(lastPointOnTrackBall, currentPointOnTrackBall));
+		var rotationQuat = glMatrix.quat.setAxisAngle(glMatrix.quat.create(), axisFromCrossProduct, angleFromDotProduct);
+		glMatrix.quat.normalize(rotationQuat, rotationQuat);
+		return glMatrix.quat.multiply(glMatrix.quat.create(), rotationQuat, lastQuat);
 	}
 	// Project the mouse pointer to the surface of trackball
 	function getProjectionPointOnSurface(point) {
-			var radius = canvas.width/3;  // trackball virtual radius : 1/3 of canvas' width
-			var center = glMatrix.vec3.fromValues(canvas.width/2, canvas.height/2, 0);  // Center Point of Trackball virtual
-			var pointVector = glMatrix.vec3.subtract(glMatrix.vec3.create(), point, center);
-			pointVector[1] = pointVector[1] * (-1); // Flip the y value
-			var radius2 = radius * radius;
-			var length2 = pointVector[0] * pointVector[0] + pointVector[1] * pointVector[1];
-			if (length2 <= radius2) pointVector[2] = Math.sqrt(radius2 - length2); // Get the z value from the phytagoras formula
-			else {  // Set the value as 0, than x and y as the Phytagoras which form a slanted side along the radius					pointVector[0] *= radius / Math.sqrt(length2);
-					pointVector[1] *= radius / Math.sqrt(length2);
-					pointVector[2] = 0;
-			}
-			return glMatrix.vec3.normalize(glMatrix.vec3.create(), pointVector);
+		var radius = canvas.width/3;  // trackball virtual radius : 1/3 of canvas' width
+		var center = glMatrix.vec3.fromValues(canvas.width/2, canvas.height/2, 0);  // Center Point of Trackball virtual
+		var pointVector = glMatrix.vec3.subtract(glMatrix.vec3.create(), point, center);
+		pointVector[1] = pointVector[1] * (-1); // Flip the y value
+		var radius2 = radius * radius;
+		var length2 = pointVector[0] * pointVector[0] + pointVector[1] * pointVector[1];
+		if (length2 <= radius2) pointVector[2] = Math.sqrt(radius2 - length2); // Get the z value from the phytagoras formula
+		else {  // Set the value as 0, than x and y as the Phytagoras which form a slanted side along the radius					pointVector[0] *= radius / Math.sqrt(length2);
+				pointVector[1] *= radius / Math.sqrt(length2);
+				pointVector[2] = 0;
+		}
+		return glMatrix.vec3.normalize(glMatrix.vec3.create(), pointVector);
 	}
 
   	function changeBoxPos(xyz, mov) {
