@@ -346,6 +346,35 @@ function main() {
 	// end cam init section
 	
 	// controller section
+
+	// Interactive orbital rotation with mouse using quaternion concept
+	var rotationMatrix = glMatrix.mat4.create();
+	var lastPointOnTrackBall = currentPointOnTrackBall = getProjectionPointOnSurface(glMatrix.vec3.fromValues(cameraX, cameraY, 0));
+	var lastQuat = glMatrix.quat.create();
+	function computeCurrentQuat() {
+			// count the quartenion rotation in every change of mouse pointer position 
+			var axisFromCrossProduct = glMatrix.vec3.cross(glMatrix.vec3.create(), lastPointOnTrackBall, currentPointOnTrackBall);
+			var angleFromDotProduct = Math.acos(glMatrix.vec3.dot(lastPointOnTrackBall, currentPointOnTrackBall));
+			var rotationQuat = glMatrix.quat.setAxisAngle(glMatrix.quat.create(), axisFromCrossProduct, angleFromDotProduct);
+			glMatrix.quat.normalize(rotationQuat, rotationQuat);
+			return glMatrix.quat.multiply(glMatrix.quat.create(), rotationQuat, lastQuat);
+	}
+	// Project the mouse pointer to the surface of trackball
+	function getProjectionPointOnSurface(point) {
+			var radius = canvas.width/3;  // trackball virtual radius : 1/3 of canvas' width
+			var center = glMatrix.vec3.fromValues(canvas.width/2, canvas.height/2, 0);  // Center Point of Trackball virtual
+			var pointVector = glMatrix.vec3.subtract(glMatrix.vec3.create(), point, center);
+			pointVector[1] = pointVector[1] * (-1); // Flip the y value
+			var radius2 = radius * radius;
+			var length2 = pointVector[0] * pointVector[0] + pointVector[1] * pointVector[1];
+			if (length2 <= radius2) pointVector[2] = Math.sqrt(radius2 - length2); // Get the z value from the phytagoras formula
+			else {  // Set the value as 0, than x and y as the Phytagoras which form a slanted side along the radius					pointVector[0] *= radius / Math.sqrt(length2);
+					pointVector[1] *= radius / Math.sqrt(length2);
+					pointVector[2] = 0;
+			}
+			return glMatrix.vec3.normalize(glMatrix.vec3.create(), pointVector);
+	}
+
   	function changeBoxPos(xyz, mov) {
 		var index_start = 9 * 24 * 5;
 		for (var it = 0; it < box.length; it += 9) {
@@ -403,8 +432,8 @@ function main() {
 			if (challenge4switch) challenge4switch = false; // space
 			else challenge4switch = true;
 		
-			lightController(event);
-
+		lightController(event);
+		
 		glMatrix.mat4.lookAt(
 				viewMatrix,
 				[cameraX, cameraY, cameraZ],    // the location of the eye or the camera
@@ -425,7 +454,44 @@ function main() {
 		);
 		// gl.uniformMatrix4fv(uView, false, viewMatrix);
 		// gl.uniformMatrix4fv(uViewR, false, viewMatrixR);
+		
+		// trackball event
+		var dragging;
+    	function onMouseDown(event) {
+			var x = event.clientX;
+			var y = event.clientY;
+			var rect = event.target.getBoundingClientRect();
+			// When the mouse pointer is inside the frame
+			if (
+				rect.left <= x &&
+				rect.right >= x &&
+				rect.top <= y &&
+				rect.bottom >= y
+			) {
+				dragging = true;
+			}
+			lastPointOnTrackBall = getProjectionPointOnSurface(glMatrix.vec3.fromValues(x, y, 0));
+			currentPointOnTrackBall = lastPointOnTrackBall;
+		}
+		function onMouseUp(event) {
+			dragging = false;
+			if (currentPointOnTrackBall != lastPointOnTrackBall) {
+				lastQuat = computeCurrentQuat();
+			}
+    	}
+		function onMouseMove(event) {
+			if (dragging) {
+				var x = event.clientX;
+				var y = event.clientY;
+				currentPointOnTrackBall = getProjectionPointOnSurface(glMatrix.vec3.fromValues(x, y, 0));
+				glMatrix.mat4.fromQuat(rotationMatrix, computeCurrentQuat());
+			}
+		}
+		document.addEventListener('mousedown', onMouseDown);
+		document.addEventListener('mouseup', onMouseUp);
+		document.addEventListener('mousemove', onMouseMove);
 	}
+
 	document.addEventListener("keydown", onKeydown);
 	// end controller section
 
@@ -510,12 +576,14 @@ function main() {
 		gl.uniform3fv(uSpecularConstant, [1.0, 1.0, 1.0]);  // white light
 		gl.uniform3fv(uViewerPosition, [cameraX, cameraY, cameraZ]);
 		var uModel = gl.getUniformLocation(currShader, "uModel");
-
-		var modelMatrix = glMatrix.mat4.create();
-		gl.uniformMatrix4fv(uModel, false, modelMatrix);
-		var normalModelMatrix = glMatrix.mat3.create();
-		glMatrix.mat3.normalFromMat4(normalModelMatrix, modelMatrix);
-		gl.uniformMatrix3fv(uNormalModel, false, normalModelMatrix);
+		
+		// Transformation
+        var modelMatrix = glMatrix.mat4.create();
+        glMatrix.mat4.multiply(modelMatrix, modelMatrix, rotationMatrix);
+        gl.uniformMatrix4fv(uModel, false, modelMatrix);
+        var normalModelMatrix = glMatrix.mat3.create();
+        glMatrix.mat3.normalFromMat4(normalModelMatrix, modelMatrix);
+        gl.uniformMatrix3fv(uNormalModel, false, normalModelMatrix);
 		
 		if (challenge4switch) {
 			gl.uniform3fv(uDiffuseConstant, [.0, .0, .0]);   // white light / off
